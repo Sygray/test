@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/optional.hpp>
 #include <openssl/hmac.h> 
 #include <openssl/sha.h>
@@ -100,6 +101,26 @@ int main()
         }
 
         cout << chunk << endl;
+	
+	//Parse response
+	ptree ptRes;
+	std::istringstream is(chunk);
+	read_json(is, ptRes);
+	double fundJPY, fundBTC, fundMON, depoJPY, depoBTC, depoMON;
+	try {
+		fundJPY = ptRes.get<double>("return.funds.jpy");
+		fundBTC = ptRes.get<double>("return.funds.btc");
+		fundMON = ptRes.get<double>("return.funds.mona");
+		depoJPY = ptRes.get<double>("return.deposit.jpy");
+		depoBTC = ptRes.get<double>("return.deposit.btc");
+		depoMON = ptRes.get<double>("return.deposit.mona");
+	}catch(ptree_error& e){
+		cout << "ptree_error##" << e.what() << endl;
+	}
+	cout << fixed << setprecision(6);
+	cout << "JPY: " << fundJPY << " / " << depoJPY << endl;
+	cout << "BTC: " << fundBTC << " / " << depoBTC << endl;
+	cout << "MON: " << fundMON << " / " << depoMON << endl;
 
 	return 0;
 }
